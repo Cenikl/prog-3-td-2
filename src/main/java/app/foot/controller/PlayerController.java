@@ -27,10 +27,12 @@ public class PlayerController {
     }
 
     @PostMapping("/players")
-    public List<PlayerEntity> postPlayers(@RequestBody List<app.foot.model.Player> players){
-        return service.postPlayers(players);
-
+    public List<Player> addPlayers(@RequestBody List<Player> toCreate) {
+        List<app.foot.model.Player> domain = toCreate.stream()
+                .map(mapper::toDomain)
+                .collect(Collectors.toUnmodifiableList());
+        return service.createPlayers(domain).stream()
+                .map(mapper::toRest)
+                .collect(Collectors.toUnmodifiableList());
     }
-
-    //TODO: add POST /players and add integration test ok and ko
 }

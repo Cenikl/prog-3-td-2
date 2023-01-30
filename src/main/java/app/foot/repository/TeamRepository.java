@@ -9,6 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface TeamRepository extends JpaRepository<TeamEntity, Integer> {
-
-    Optional<TeamEntity> findByName(String teamName);
+    TeamEntity findByName(String name);
 }

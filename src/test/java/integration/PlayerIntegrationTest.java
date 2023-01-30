@@ -86,6 +86,7 @@ class PlayerIntegrationTest {
 
     @Test
     void create_players_ok() throws Exception {
+<<<<<<< HEAD
         MockHttpServletResponse response = mockMvc
                 .perform(post("/players"))
 
@@ -93,6 +94,24 @@ class PlayerIntegrationTest {
         assertEquals(HttpStatus.OK.value(), response.getStatus());
         assertEquals(1, actual.size());
         assertTrue(actual.);
+=======
+        Player toCreate = Player.builder()
+                .name("Joe Doe")
+                .isGuardian(false)
+                .teamName("E1")
+                .build();
+        MockHttpServletResponse response = mockMvc
+                .perform(post("/players")
+                        .content(objectMapper.writeValueAsString(List.of(toCreate)))
+                        .contentType("application/json")
+                        .accept("application/json"))
+                .andReturn()
+                .getResponse();
+        List<Player> actual = convertFromHttpResponse(response);
+
+        assertEquals(1, actual.size());
+        assertEquals(toCreate, actual.get(0).toBuilder().id(null).build());
+>>>>>>> bab1128091aef2ec2ca6f40b36b7ce9cd710ee00
     }
 
     private List<Player> convertFromHttpResponse(MockHttpServletResponse response)
