@@ -3,7 +3,11 @@ package integration;
 import app.foot.FootApi;
 import app.foot.controller.rest.Player;
 import app.foot.model.Team;
+import app.foot.repository.PlayerRepository;
+import app.foot.repository.entity.PlayerEntity;
+import app.foot.repository.entity.TeamEntity;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import org.junit.jupiter.api.Test;
@@ -19,8 +23,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = FootApi.class)
 @AutoConfigureMockMvc
@@ -29,10 +34,19 @@ class PlayerIntegrationTest {
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    @Autowired
+    private PlayerRepository repository;
+
     Team team1(){
         return Team.builder()
                 .id(1)
                 .name("Madrid")
+                .build();
+    }
+    TeamEntity team2(){
+        return TeamEntity.builder()
+                .id(10)
+                .name("ground")
                 .build();
     }
 
@@ -86,15 +100,6 @@ class PlayerIntegrationTest {
 
     @Test
     void create_players_ok() throws Exception {
-<<<<<<< HEAD
-        MockHttpServletResponse response = mockMvc
-                .perform(post("/players"))
-
-
-        assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertEquals(1, actual.size());
-        assertTrue(actual.);
-=======
         Player toCreate = Player.builder()
                 .name("Joe Doe")
                 .isGuardian(false)
@@ -111,7 +116,28 @@ class PlayerIntegrationTest {
 
         assertEquals(1, actual.size());
         assertEquals(toCreate, actual.get(0).toBuilder().id(null).build());
->>>>>>> bab1128091aef2ec2ca6f40b36b7ce9cd710ee00
+    }
+    @Test
+    void update_player_ok() throws Exception {
+        String newName = "Jaden";
+        Boolean guardian = true;
+        Player expected = Player.builder()
+                .id(2)
+                .name("Jaden")
+                .isGuardian(true)
+                .teamName("E1")
+                .build();
+        MockHttpServletResponse response = mockMvc
+                .perform(put("/players/2")
+                        .param("playerName",newName)
+                        .param("isGuardian", String.valueOf(guardian)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse();
+        Player actual = convertPlayerFromHttpResponse(response);
+        assertEquals(expected,actual);
+
     }
 
     private List<Player> convertFromHttpResponse(MockHttpServletResponse response)
@@ -121,5 +147,13 @@ class PlayerIntegrationTest {
         return objectMapper.readValue(
                 response.getContentAsString(),
                 playerListType);
+    }
+    private Player convertPlayerFromHttpResponse(MockHttpServletResponse response)
+            throws JsonProcessingException, UnsupportedEncodingException {
+        JavaType playerType = objectMapper.getTypeFactory()
+                .constructType(Player.class);
+        return objectMapper.readValue(
+                response.getContentAsString(),
+                playerType);
     }
 }

@@ -62,7 +62,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Players'
+                  $ref: '#/components/schemas/Match'
   /matches/{matchId}/goals:
     post:
       tags:

@@ -29,4 +29,20 @@ public class PlayerService {
                 .map(mapper::toDomain)
                 .collect(Collectors.toUnmodifiableList());
     }
+    public Player getPlayer(int playerId){
+        return mapper.toDomain(
+                repository.findById(playerId)
+                        .orElseThrow(() -> new RuntimeException("Player#" + playerId + " not found."))
+        );
+    }
+    public PlayerEntity updatePlayerName(int playerId,String playerName){
+        PlayerEntity player = repository.findById(playerId).get();
+        player.setName(playerName);
+        return repository.save(player);
+    }
+    public PlayerEntity updateGuardian(int playerId,Boolean isGuardian){
+        PlayerEntity player = repository.findById(playerId).get();
+        player.setGuardian(isGuardian);
+        return repository.save(player);
+    }
 }

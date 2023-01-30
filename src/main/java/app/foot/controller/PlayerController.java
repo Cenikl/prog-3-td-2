@@ -5,10 +5,7 @@ import app.foot.controller.rest.mapper.PlayerRestMapper;
 import app.foot.repository.entity.PlayerEntity;
 import app.foot.service.PlayerService;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +33,16 @@ public class PlayerController {
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    //TODO: add PUT /players where you can modify the name and the guardian status of a player
-    // Don't forget to add integration tests for this
+    // TODO: add PUT /players where you can modify the name and the guardian status of a player
+    //  Don't forget to add integration tests for this
+
+    @PutMapping("/players/{playerId}")
+    public Player updatePlayer(@PathVariable int playerId,
+                               @RequestParam(required = false) String playerName,
+                               @RequestParam(required = false) Boolean isGuardian){
+        service.updatePlayerName(playerId,playerName);
+        service.updateGuardian(playerId,isGuardian);
+        return mapper.toRest(service.getPlayer(playerId));
+    }
+
 }

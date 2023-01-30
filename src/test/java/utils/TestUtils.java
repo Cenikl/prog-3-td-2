@@ -82,6 +82,14 @@ public class TestUtils {
                 .team(teamEntityBarea)
                 .build();
     }
+    public static app.foot.model.Player playerRakoto(){
+        return app.foot.model.Player.builder()
+                .id(1)
+                .name("J1")
+                .isGuardian(false)
+                .teamName(teamBarea().getName())
+                .build();
+    }
 
     public static TeamEntity teamGhana() {
         return TeamEntity.builder()

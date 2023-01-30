@@ -21,6 +21,7 @@ public class MatchController {
 
     @GetMapping("/matches/{id}")
     public Match getMatchById(@PathVariable Integer id) {
+
         return mapper.toRest(service.getMatchById(id));
     }
     //TODO: add integration test ok and ko

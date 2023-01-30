@@ -42,8 +42,6 @@ public class PlayerMapper {
                 .minute(scorer.getMinute())
                 .build();
     }
-
-    //TODO: add unit test ok and ko for this
     public PlayerEntity toEntity(Player domain) {
         return PlayerEntity.builder()
                 .id(domain.getId())

@@ -2,7 +2,9 @@ package integration;
 
 import app.foot.FootApi;
 import app.foot.controller.rest.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -11,10 +13,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,8 +31,29 @@ class MatchIntegrationTest {
             .findAndRegisterModules();  //Allow 'java.time.Instant' mapping
 
     @Test
+    void read_matches_ok() throws Exception{
+        MockHttpServletResponse response = mockMvc.perform(get("/matches"))
+                .andExpect((status().isOk()))
+                .andReturn().getResponse();
+        List<Match> actual = convertFromHttpResponse(response);
+
+        assertEquals(HttpStatus.OK.value(),response.getStatus());
+        assertEquals(3,actual.size());
+        assertTrue(actual.contains(expectedMatch2()));
+
+    }
+    @Test
+    void read_matches_ko() throws Exception{
+        MockHttpServletResponse response = mockMvc.perform(get("/matches"))
+                .andExpect(status().is5xxServerError())
+                .andReturn().getResponse();
+    }
+
+    @Test
     void read_match_by_id_ok() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(get("/matches/2"))
+        MockHttpServletResponse response = mockMvc.perform(get("/matches/2")
+                        .contentType("application/json")
+                        .accept("application/json"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse();
@@ -86,6 +111,7 @@ class MatchIntegrationTest {
                 .id(6)
                 .name("J6")
                 .isGuardian(false)
+                .teamName(team3().getName())
                 .build();
     }
 
@@ -94,6 +120,7 @@ class MatchIntegrationTest {
                 .id(3)
                 .name("J3")
                 .isGuardian(false)
+                .teamName(team2().getName())
                 .build();
     }
 
@@ -102,5 +129,13 @@ class MatchIntegrationTest {
                 .id(2)
                 .name("E2")
                 .build();
+    }
+    private List<Match> convertFromHttpResponse(MockHttpServletResponse response)
+            throws JsonProcessingException, UnsupportedEncodingException {
+        CollectionType matchListType = objectMapper.getTypeFactory()
+                .constructCollectionType(List.class, Match.class);
+        return objectMapper.readValue(
+                response.getContentAsString(),
+                matchListType);
     }
 }
