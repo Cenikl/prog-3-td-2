@@ -2,6 +2,7 @@ package integration;
 
 import app.foot.FootApi;
 import app.foot.controller.rest.Player;
+import app.foot.model.Team;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
@@ -19,6 +20,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @SpringBootTest(classes = FootApi.class)
 @AutoConfigureMockMvc
@@ -27,11 +29,26 @@ class PlayerIntegrationTest {
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    Team team1(){
+        return Team.builder()
+                .id(1)
+                .name("Madrid")
+                .build();
+    }
+
     Player player1() {
         return Player.builder()
                 .id(1)
                 .name("J1")
                 .isGuardian(false)
+                .build();
+    }
+    app.foot.model.Player playerOne() {
+        return app.foot.model.Player.builder()
+                .id(1)
+                .name("J1")
+                .isGuardian(false)
+                .teamName("Madrid")
                 .build();
     }
 
@@ -65,6 +82,17 @@ class PlayerIntegrationTest {
                 player1(),
                 player2(),
                 player3())));
+    }
+
+    @Test
+    void create_players_ok() throws Exception {
+        MockHttpServletResponse response = mockMvc
+                .perform(post("/players"))
+
+
+        assertEquals(HttpStatus.OK.value(), response.getStatus());
+        assertEquals(1, actual.size());
+        assertTrue(actual.);
     }
 
     private List<Player> convertFromHttpResponse(MockHttpServletResponse response)

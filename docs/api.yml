@@ -5,6 +5,49 @@ info:
   version: latest
   title: PROG3 - TD2
 paths:
+  /players:
+    get:
+      tags:
+        - Players
+      summary: Get all players
+      operationId: getPlayers
+      responses:
+        '200':
+          description: List of Players
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlayerEntity'
+    post:
+      tags:
+        - Players
+      summary: Create players
+      parameters:
+        - name: TeamName
+          in: path
+          schema:
+            type: string
+          required: true
+      description: Be careful! Team should exist
+      operationId: postPlayers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Player'
+      responses:
+        '200':
+          description: Create Players
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlayerEntity'
   /matches:
     get:
       tags:
@@ -19,7 +62,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Match'
+                  $ref: '#/components/schemas/Players'
   /matches/{matchId}/goals:
     post:
       tags:
@@ -49,6 +92,12 @@ paths:
                 $ref: '#/components/schemas/Match'
 components:
   schemas:
+    PlayerEntity:
+      properties:
+        teamName:
+          type: string
+      allOf:
+        - $ref: '#/components/schemas/Player'
     Team:
       type: object
       properties:
