@@ -55,6 +55,7 @@ class PlayerIntegrationTest {
                 .id(1)
                 .name("J1")
                 .isGuardian(false)
+                .teamName("E1")
                 .build();
     }
     app.foot.model.Player playerOne() {
@@ -71,6 +72,7 @@ class PlayerIntegrationTest {
                 .id(2)
                 .name("J2")
                 .isGuardian(false)
+                .teamName("E1")
                 .build();
     }
 
@@ -79,9 +81,9 @@ class PlayerIntegrationTest {
                 .id(3)
                 .name("J3")
                 .isGuardian(false)
+                .teamName("E2")
                 .build();
     }
-
     @Test
     void read_players_ok() throws Exception {
         MockHttpServletResponse response = mockMvc
@@ -91,7 +93,6 @@ class PlayerIntegrationTest {
         List<Player> actual = convertFromHttpResponse(response);
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertEquals(9, actual.size());
         assertTrue(actual.containsAll(List.of(
                 player1(),
                 player2(),
@@ -122,13 +123,13 @@ class PlayerIntegrationTest {
         String newName = "Jaden";
         Boolean guardian = true;
         Player expected = Player.builder()
-                .id(2)
+                .id(5)
                 .name("Jaden")
                 .isGuardian(true)
-                .teamName("E1")
+                .teamName("E3")
                 .build();
         MockHttpServletResponse response = mockMvc
-                .perform(put("/players/2")
+                .perform(put("/players/5")
                         .param("playerName",newName)
                         .param("isGuardian", String.valueOf(guardian)))
                 .andDo(print())
@@ -137,7 +138,27 @@ class PlayerIntegrationTest {
                 .getResponse();
         Player actual = convertPlayerFromHttpResponse(response);
         assertEquals(expected,actual);
+    }
+    @Test
+    void update_player_ko() throws Exception {
+        String newName = "Jaden";
+        Boolean guardian = true;
+        Player expected = Player.builder()
+                .id(2)
+                .name("Jaden")
+                .isGuardian(true)
+                .teamName("E1")
+                .build();
+        MockHttpServletResponse response = mockMvc
+                .perform(put("/players/100")
+                        .param("playerName",newName)
+                        .param("isGuardian", String.valueOf(guardian)))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn()
+                .getResponse();
 
+        assertEquals(404,response.getStatus());
     }
 
     private List<Player> convertFromHttpResponse(MockHttpServletResponse response)

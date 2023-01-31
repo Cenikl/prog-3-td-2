@@ -5,8 +5,10 @@ import app.foot.controller.rest.PlayerScorer;
 import app.foot.controller.rest.mapper.MatchRestMapper;
 import app.foot.controller.rest.mapper.PlayerScorerRestMapper;
 import app.foot.controller.validator.GoalValidator;
+import app.foot.exception.ForbiddenException;
 import app.foot.service.MatchService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,20 +26,16 @@ public class MatchController {
 
         return mapper.toRest(service.getMatchById(id));
     }
-    //TODO: add integration test ok and ko
     @GetMapping("/matches")
-    public List<Match> getMatches() {
-        return service.getMatches().stream()
-                .map(mapper::toRest)
-                .toList();
+    public ResponseEntity<List<Match>> getMatches() {
+        return service.getMatches();
     }
-    //TODO: add integration test ok and ko of adding goals into match where id = 3
     @PostMapping("/matches/{matchId}/goals")
-    public Match addGoals(@PathVariable int matchId, @RequestBody List<PlayerScorer> scorers) {
+    public ResponseEntity<Match> addGoals(@PathVariable int matchId, @RequestBody List<PlayerScorer> scorers) {
         scorers.forEach(validator);
         List<app.foot.model.PlayerScorer> scorerList = scorers.stream()
                 .map(scorerMapper::toDomain)
                 .toList();
-        return mapper.toRest(service.addGoals(matchId, scorerList));
+        return service.addGoals(matchId, scorerList);
     }
 }

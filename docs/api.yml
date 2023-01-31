@@ -5,6 +5,20 @@ info:
   version: latest
   title: PROG3 - TD2
 paths:
+  /ping:
+    get:
+      tags:
+        - Health
+      summary: Check the server
+      operationId: getHealth
+      responses:
+        '200':
+          description: The server is Up
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "pong"
   /players:
     get:
       tags:
@@ -24,12 +38,6 @@ paths:
       tags:
         - Players
       summary: Create players
-      parameters:
-        - name: TeamName
-          in: path
-          schema:
-            type: string
-          required: true
       description: Be careful! Team should exist
       operationId: postPlayers
       requestBody:
@@ -38,7 +46,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Player'
+                $ref: '#/components/schemas/PlayerEntity'
       responses:
         '200':
           description: Create Players
@@ -48,6 +56,43 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/PlayerEntity'
+  /players/{playerId}:
+    put:
+      tags:
+        - Players
+      summary: Update a player
+      description: Update a playerName or the guardian role
+      operationId: putPlayers
+      parameters:
+        - in: path
+          name: playerId
+          schema:
+            type: integer
+          description: Get the player by the player's id
+        - in: query
+          name: playerName
+          schema:
+            type: string
+          description: Update the name of the player here
+        - in: query
+          name: isGuardian
+          schema:
+            type: boolean
+            default: false
+            enum:
+              - true
+              - false
+          description: Update the role of the player here
+      responses:
+        '200':
+          description: Update a player
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerEntity'
+        '404':
+          description: The player doesn't exist
+
   /matches:
     get:
       tags:
@@ -63,6 +108,28 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Match'
+        '500':
+          description: Internal server error
+  /matches/{id}:
+    get:
+      tags:
+        - Matches
+      summary: Get a specific match
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+      description: Get a specific match by his id
+      operationId: getMatch
+      responses:
+        '200':
+          description: The unique match
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
   /matches/{matchId}/goals:
     post:
       tags:
@@ -90,6 +157,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Match'
+        '403':
+          description: A match with id = 3 is not allowed
 components:
   schemas:
     PlayerEntity:

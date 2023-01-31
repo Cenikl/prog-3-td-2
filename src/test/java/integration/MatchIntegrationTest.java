@@ -2,6 +2,7 @@ package integration;
 
 import app.foot.FootApi;
 import app.foot.controller.rest.*;
+import app.foot.exception.ForbiddenException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
@@ -20,6 +21,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = FootApi.class)
@@ -35,6 +38,7 @@ class MatchIntegrationTest {
         MockHttpServletResponse response = mockMvc.perform(get("/matches"))
                 .andExpect((status().isOk()))
                 .andReturn().getResponse();
+
         List<Match> actual = convertFromHttpResponse(response);
 
         assertEquals(HttpStatus.OK.value(),response.getStatus());
@@ -45,7 +49,7 @@ class MatchIntegrationTest {
     @Test
     void read_matches_ko() throws Exception{
         MockHttpServletResponse response = mockMvc.perform(get("/matches"))
-                .andExpect(status().is5xxServerError())
+                .andExpect((status().is5xxServerError()))
                 .andReturn().getResponse();
     }
 
@@ -62,6 +66,46 @@ class MatchIntegrationTest {
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
         assertEquals(expectedMatch2(), actual);
+    }
+    @Test
+    void create_goals_ok() throws Exception{
+        PlayerScorer playerScorer = PlayerScorer.builder()
+                .player(player6())
+                .isOG(false)
+                .scoreTime(50)
+                .build();
+        MockHttpServletResponse response = mockMvc
+                .perform(post("/matches/2/goals")
+                        .content(objectMapper.writeValueAsString(List.of(playerScorer)))
+                        .contentType("application/json")
+                        .accept("application/json"))
+                .andReturn()
+                .getResponse();
+        Match actual = objectMapper.readValue(
+                response.getContentAsString(), Match.class);
+
+        assertEquals(HttpStatus.OK.value(),response.getStatus());
+        assertTrue(actual.getTeamB().getScorers().contains(playerScorer));
+       // assertEquals(5,actual.getTeamB().getScorers().size());
+    }
+    @Test
+    void create_goals_ko() throws Exception {
+        PlayerScorer playerScorer = PlayerScorer.builder()
+                .player(player3())
+                .isOG(false)
+                .scoreTime(50)
+                .build();
+        MockHttpServletResponse response = mockMvc
+                .perform(post("/matches/3/goals")
+                        .content(objectMapper.writeValueAsString(List.of(playerScorer)))
+                        .contentType("application/json")
+                        .accept("application/json"))
+                .andDo(print())
+                .andExpect(status().isForbidden())
+                .andReturn()
+                .getResponse();
+
+        assertEquals(403,response.getStatus());
     }
 
     private static Match expectedMatch2() {
@@ -138,4 +182,5 @@ class MatchIntegrationTest {
                 response.getContentAsString(),
                 matchListType);
     }
+
 }
