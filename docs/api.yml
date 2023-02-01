@@ -157,8 +157,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Match'
-        '403':
-          description: A match with id = 3 is not allowed
+        '400':
+          description: Bad request
 components:
   schemas:
     PlayerEntity:

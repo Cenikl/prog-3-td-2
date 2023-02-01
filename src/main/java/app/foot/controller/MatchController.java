@@ -31,7 +31,7 @@ public class MatchController {
         return service.getMatches();
     }
     @PostMapping("/matches/{matchId}/goals")
-    public ResponseEntity<Match> addGoals(@PathVariable int matchId, @RequestBody List<PlayerScorer> scorers) {
+    public Match addGoals(@PathVariable int matchId, @RequestBody List<PlayerScorer> scorers) {
         scorers.forEach(validator);
         List<app.foot.model.PlayerScorer> scorerList = scorers.stream()
                 .map(scorerMapper::toDomain)

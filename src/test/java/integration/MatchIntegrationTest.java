@@ -2,10 +2,12 @@ package integration;
 
 import app.foot.FootApi;
 import app.foot.controller.rest.*;
+import app.foot.exception.BadRequestException;
 import app.foot.exception.ForbiddenException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,12 +20,12 @@ import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static utils.TestUtils.scorer1;
 
 @SpringBootTest(classes = FootApi.class)
 @AutoConfigureMockMvc
@@ -75,7 +77,7 @@ class MatchIntegrationTest {
                 .scoreTime(50)
                 .build();
         MockHttpServletResponse response = mockMvc
-                .perform(post("/matches/2/goals")
+                .perform(post("/matches/3/goals")
                         .content(objectMapper.writeValueAsString(List.of(playerScorer)))
                         .contentType("application/json")
                         .accept("application/json"))
@@ -91,21 +93,22 @@ class MatchIntegrationTest {
     @Test
     void create_goals_ko() throws Exception {
         PlayerScorer playerScorer = PlayerScorer.builder()
-                .player(player3())
+                .player(player6())
                 .isOG(false)
-                .scoreTime(50)
+                .scoreTime(100)
                 .build();
-        MockHttpServletResponse response = mockMvc
+        String expectMess = "400 BAD_REQUEST : Player#J6 cannot score before after minute 90.";
+        Exception exception = assertThrows(ServletException.class, () -> {mockMvc
                 .perform(post("/matches/3/goals")
                         .content(objectMapper.writeValueAsString(List.of(playerScorer)))
                         .contentType("application/json")
                         .accept("application/json"))
-                .andDo(print())
-                .andExpect(status().isForbidden())
                 .andReturn()
-                .getResponse();
+                .getResponse();});
 
-        assertEquals(403,response.getStatus());
+        assertEquals(BadRequestException.class,exception.getCause().getClass());
+        assertEquals(expectMess,exception.getCause().getMessage());
+
     }
 
     private static Match expectedMatch2() {

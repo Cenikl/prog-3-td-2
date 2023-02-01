@@ -1,6 +1,7 @@
 package app.foot.service;
 
 import app.foot.controller.rest.mapper.MatchRestMapper;
+import app.foot.controller.validator.GoalValidator;
 import app.foot.exception.ForbiddenException;
 import app.foot.model.Match;
 import app.foot.model.PlayerScorer;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class MatchService {
+
+  private final GoalValidator validator;
   private final MatchRepository repository;
   private final MatchMapper mapper;
 
@@ -35,13 +38,9 @@ public class MatchService {
     );
   }
 
-  public ResponseEntity<app.foot.controller.rest.Match> addGoals(int matchId, List<PlayerScorer> scorers) {
-    if(matchId == 3){
-      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-    } else{
-    getMatchById(matchId);
-    scoreService.addGoals(matchId, scorers);
-    return new ResponseEntity<>(restMapper.toRest(getMatchById(matchId)), HttpStatus.OK);
-    }
+  public app.foot.controller.rest.Match addGoals(int matchId, List<PlayerScorer> scorers) {
+      getMatchById(matchId);
+      scoreService.addGoals(matchId, scorers);
+      return restMapper.toRest(getMatchById(matchId));
   }
 }
