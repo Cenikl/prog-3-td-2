@@ -121,9 +121,6 @@ public class PlayerMapperTest {
 
     @Test
     void player_to_entity_ko(){
-        when(teamRepositoryMock.findByName(any()))
-                .thenThrow(new NotFoundException("Team not found"));
-
         assertThrowsExceptionMessage("404 NOT_FOUND : Team not found",NotFoundException.class,
                 () -> subject.toEntity(playerRakoto()));
     }

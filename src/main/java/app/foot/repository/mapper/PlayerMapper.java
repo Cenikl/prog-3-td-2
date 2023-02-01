@@ -1,5 +1,6 @@
 package app.foot.repository.mapper;
 
+import app.foot.exception.NotFoundException;
 import app.foot.model.Player;
 import app.foot.model.PlayerScorer;
 import app.foot.repository.MatchRepository;
@@ -43,11 +44,15 @@ public class PlayerMapper {
                 .build();
     }
     public PlayerEntity toEntity(Player domain) {
+        if(teamRepository.findByName(domain.getTeamName()) == null){
+            throw new NotFoundException("Team not found");
+        } else {
         return PlayerEntity.builder()
                 .id(domain.getId())
                 .name(domain.getName())
                 .team(teamRepository.findByName(domain.getTeamName()))
                 .guardian(domain.getIsGuardian())
                 .build();
+        }
     }
 }
