@@ -26,9 +26,9 @@ public class MatchService {
   private final MatchRestMapper restMapper;
   private final PlayerScoreService scoreService;
 
-  public ResponseEntity<List<app.foot.controller.rest.Match>> getMatches() {
-    return new ResponseEntity<>((repository.findAll().stream().map(mapper::toDomain).toList()).stream().map(restMapper::toRest)
-            .toList(),HttpStatus.OK);
+  public List<app.foot.controller.rest.Match> getMatches() {
+    return (repository.findAll()
+            .stream().map(mapper::toDomain).toList().stream().map(restMapper::toRest).toList());
   }
 
   public Match getMatchById(int matchId) {

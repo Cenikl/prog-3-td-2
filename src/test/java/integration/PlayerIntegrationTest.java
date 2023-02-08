@@ -123,13 +123,13 @@ class PlayerIntegrationTest {
         String newName = "Jaden";
         Boolean guardian = true;
         Player expected = Player.builder()
-                .id(5)
+                .id(10)
                 .name("Jaden")
                 .isGuardian(true)
-                .teamName("E3")
+                .teamName("E1")
                 .build();
         MockHttpServletResponse response = mockMvc
-                .perform(put("/players/5")
+                .perform(put("/players/10")
                         .param("playerName",newName)
                         .param("isGuardian", String.valueOf(guardian)))
                 .andDo(print())
@@ -143,12 +143,6 @@ class PlayerIntegrationTest {
     void update_player_ko() throws Exception {
         String newName = "Jaden";
         Boolean guardian = true;
-        Player expected = Player.builder()
-                .id(2)
-                .name("Jaden")
-                .isGuardian(true)
-                .teamName("E1")
-                .build();
         MockHttpServletResponse response = mockMvc
                 .perform(put("/players/100")
                         .param("playerName",newName)

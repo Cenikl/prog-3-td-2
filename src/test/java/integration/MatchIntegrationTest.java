@@ -21,8 +21,7 @@ import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static utils.TestUtils.player1;
@@ -51,6 +50,15 @@ class MatchIntegrationTest {
     }
     @Test
     void read_matches_ko() throws Exception{
+
+    //if someone changes the data in the database to a wrong value, the controller should throw an internal server error
+        MockHttpServletResponse response = mockMvc.perform(get("/matches"))
+                .andExpect((status().isInternalServerError()))
+                .andReturn().getResponse();
+
+        assertEquals(500,response.getStatus());
+
+
     }
 
     @Test
