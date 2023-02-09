@@ -57,7 +57,7 @@ class MatchIntegrationTest {
     @Sql(statements = "update player_score set own_goal = null where id = 1; ",executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(statements = "update player_score set own_goal = false where id = 1; ",executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void read_matches_ko() throws Exception{
-    //if someone changes the data in the database to a wrong value, the controller should throw an internal server error
+    //if someone changes the data in the database to a wrong value, the controller should throw an internal server error if they try to retrieve it
         MockHttpServletResponse response = mockMvc.perform(get("/matches"))
                 .andExpect((status().isInternalServerError()))
                 .andReturn().getResponse();
