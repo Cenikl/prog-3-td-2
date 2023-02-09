@@ -2,10 +2,12 @@ package app.foot.controller.rest.mapper;
 
 import app.foot.controller.rest.Match;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import org.springframework.stereotype.Component;
 
 @Component
 @AllArgsConstructor
+@EqualsAndHashCode
 public class MatchRestMapper {
   private final TeamMatchMapper teamMatchMapper;
 

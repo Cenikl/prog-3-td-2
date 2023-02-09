@@ -26,6 +26,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static utils.TestUtils.player1;
@@ -57,13 +58,14 @@ class MatchIntegrationTest {
     @Sql(statements = "update player_score set own_goal = null where id = 1; ",executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(statements = "update player_score set own_goal = false where id = 1; ",executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void read_matches_ko() throws Exception{
-    //if someone changes the data in the database to a wrong value, the controller should throw an internal server error
+    //if someone changes the data in the database to a wrong value, the controller should throw an internal server error if they try to retrieve it
         MockHttpServletResponse response = mockMvc.perform(get("/matches"))
                 .andExpect((status().isInternalServerError()))
                 .andReturn().getResponse();
 
-        assertEquals(500,response.getStatus());
 
+        assertEquals(500,response.getStatus());
+        assertEquals("Can not set boolean field app.foot.repository.entity.PlayerScoreEntity.ownGoal to null value",response.getForwardedUrl());
 
     }
 
