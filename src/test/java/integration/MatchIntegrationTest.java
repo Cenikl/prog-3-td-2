@@ -8,12 +8,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import jakarta.servlet.ServletException;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.UnsupportedEncodingException;
@@ -36,6 +40,7 @@ class MatchIntegrationTest {
             .findAndRegisterModules();  //Allow 'java.time.Instant' mapping
 
     @Test
+    //execute this test before the other tests
     void read_matches_ok() throws Exception{
         MockHttpServletResponse response = mockMvc.perform(get("/matches"))
                 .andExpect((status().isOk()))
@@ -49,8 +54,9 @@ class MatchIntegrationTest {
 
     }
     @Test
+    @Sql(statements = "update player_score set own_goal = null where id = 1; ",executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = "update player_score set own_goal = false where id = 1; ",executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void read_matches_ko() throws Exception{
-
     //if someone changes the data in the database to a wrong value, the controller should throw an internal server error
         MockHttpServletResponse response = mockMvc.perform(get("/matches"))
                 .andExpect((status().isInternalServerError()))
@@ -82,11 +88,19 @@ class MatchIntegrationTest {
                 .isOG(false)
                 .scoreTime(50)
                 .build();
-        MockHttpServletResponse response = mockMvc
-                .perform(post("/matches/3/goals")
+
+        mockMvc.perform(post("/matches/3/goals")
                         .content(objectMapper.writeValueAsString(List.of(playerScorer)))
                         .contentType("application/json")
                         .accept("application/json"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse();
+
+        MockHttpServletResponse response = mockMvc.perform(get("/matches/3")
+                        .contentType("application/json")
+                        .accept("application/json"))
+                .andExpect(status().isOk())
                 .andReturn()
                 .getResponse();
         Match actual = objectMapper.readValue(
